@@ -106,12 +106,12 @@ async def process_document(file_path: str, user_request: str = None) -> AsyncGen
         # Generate color map
         color_map = extractor.generate_color_palette(timeline_data.events)
 
-        # Generate chart - returns tuple (html_path, png_path)
+        # Generate chart - Plotly returns tuple (html_path, png_path)
         html_path, png_path = visualizer.generate_gantt(timeline_data, color_map, "output/timeline.png")
 
-        # Set URLs for both formats
-        chart_url = "/output/timeline.html"  # For viewing (interactive)
-        download_url = "/output/timeline.png"  # For downloading
+        # Set URLs for viewing and downloading
+        chart_url = "/output/timeline.html"
+        download_url = "/output/timeline.png"
 
         yield f"data: {json.dumps({'type': 'progress', 'message': '✓ Visualization complete'})}\n\n"
         await asyncio.sleep(0.5)
@@ -125,7 +125,7 @@ async def process_document(file_path: str, user_request: str = None) -> AsyncGen
         conversation_store[session_id] = timeline_data.dict()
 
         result_data = {
-            "chart_url": chart_url,  # HTML for viewing
+            "chart_url": chart_url,  # HTML for viewing (fully static)
             "download_url": download_url,  # PNG for downloading
             "case": timeline_data.case.dict(),
             "event_count": event_count,

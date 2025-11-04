@@ -49,10 +49,27 @@ STEP 2: READ THE DOCUMENT AND EXTRACT WHAT'S RELEVANT
 Based on what the user requested, extract the relevant information:
 
 **If user wants PEOPLE/STAKEHOLDERS:**
-- Extract all people mentioned (executives, employees, regulators, etc.)
+- Extract all people mentioned (executives, employees, regulators, lawyers, consultants, etc.)
 - Note their roles, employment periods (start/end dates)
-- Identify anyone with problematic qualifications or suspicious backgrounds
-- Format: "[Name] - [Title] ([Status])" where status is "Original", "Qualified", or "Unqualified - [Reason]"
+- Identify ANYONE suspicious based on the document's legal story
+
+**Actor Name Format Rules**:
+
+EXTERNAL/3RD PARTY PEOPLE (no status parenthesis):
+  * Lawyers/Counsel: "[Name] - [Title]"
+  * Regulators: "[Name] - [Title]"
+  * Consultants: "[Name] - [Title]"
+  * External advisors: "[Name] - [Title]"
+  * Anyone not employed by the main company
+
+INTERNAL COMPANY PEOPLE (include status in parenthesis):
+  * Original executives: "[Name] - [Title] (Original)"
+  * Replacement executives: "[Name] - [Title] (Replacement)"
+  * Co-opted/Promoted due to loyalty: "[Name] - [Title] (Co-opted - Loyalty)"
+  * Unqualified appointments: "[Name] - [Title] (Unqualified - [Specific Reason])"
+  * Conflicts of interest: "[Name] - [Title] (Conflict - [Specific Reason])"
+  * Nepotism: "[Name] - [Title] (Nepotism - [Relationship])"
+  * Any other suspicious internal person: "[Name] - [Title] ([Brief Description])"
 
 **If user wants DEPARTMENTS:**
 - Extract department names and their activity periods
@@ -87,13 +104,16 @@ These will appear as VERTICAL DOTTED LINES on the chart.
 STEP 4: IDENTIFY WHAT TO HIGHLIGHT
 ================================================================================
 
-Based on the document, identify anything suspicious or problematic:
-- **For people**: Unqualified appointments, conflicts of interest, suspicious timing
-- **For departments**: Budget irregularities, suspicious activity timing
-- **For entities**: Conflicts of interest, problematic relationships
-- **For phases**: Delays, problems, irregularities
+Read the document like a legal analyst and identify ANYONE or ANYTHING suspicious based on the story:
 
-Highlight these in RED (#ef4444) with a legal explanation of why it matters.
+- **For people**: Unqualified appointments, nepotism, conflicts of interest, co-opted loyalty, suspicious timing, questionable credentials, any pattern that suggests they're part of the problem
+- **For departments**: Budget irregularities, suspicious activity timing, questionable spending patterns
+- **For entities**: Conflicts of interest, problematic relationships, hidden connections
+- **For phases**: Delays, problems, irregularities, suspicious timing
+
+**CRITICAL**: Don't limit yourself to "unqualified" - if someone is qualified but promoted for loyalty, that's suspicious. If someone has conflicts of interest, that's suspicious. Let the document's legal story guide you.
+
+Highlight ALL suspicious actors in RED (#ef4444) with a specific legal explanation of why they matter to the case.
 
 ================================================================================
 OUTPUT FORMAT
@@ -141,10 +161,17 @@ Show your reasoning in a <thinking> section before JSON output.
 
 <thinking>
 1. What does the user want to visualize? (People? Departments? Entities? Phases? Something else?)
-2. What type of document is this? What's the story?
+2. What type of document is this? What legal story is it telling? What is the document trying to PROVE?
 3. What units did I extract for the Y-axis? (List them all)
 4. What 3-5 milestone events mark the key moments?
-5. Did I find anything suspicious or problematic? What should be highlighted in red and why?
+5. WHO is suspicious in this case? Think like a lawyer:
+   - Who lacks qualifications?
+   - Who has conflicts of interest?
+   - Who was promoted for loyalty rather than merit?
+   - Who has suspicious timing in their appointments?
+   - Who has problematic relationships (nepotism, family)?
+   - Who is part of the pattern the document is trying to prove?
+   ALL suspicious people should be highlighted in RED with legal reasoning.
 6. Should I show all units or filter to specific ones based on user's request?
 7. What's the key pattern to summarize in the footer?
 </thinking>
@@ -166,7 +193,10 @@ Show your reasoning in a <thinking> section before JSON output.
     "focus_actors": null,
     "key_milestone_events": ["...", "...", "..."],
     "actor_highlights": [
-      {{"name": "Person Name - Title (Unqualified - Reason)", "color": "#ef4444", "reason": "Why this is legally significant"}}
+      {{"name": "Person Name - Title (Unqualified - Fake PhD)", "color": "#ef4444", "reason": "Fraudulent credentials enabled data manipulation"}},
+      {{"name": "Person Name - Title (Co-opted - Loyalty)", "color": "#ef4444", "reason": "Promoted specifically for demonstrating loyalty over competence"}},
+      {{"name": "Person Name - Title (Nepotism - Relationship)", "color": "#ef4444", "reason": "Family connection to board member, lacks required experience"}},
+      {{"name": "Person Name - Title (Conflict - Relationship)", "color": "#ef4444", "reason": "Undisclosed financial interest in vendor company"}}
     ],
     "sort_strategy": "chronological",
     "title_override": null,

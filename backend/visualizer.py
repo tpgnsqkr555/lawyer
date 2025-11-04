@@ -66,9 +66,8 @@ class GanttVisualizer:
             if viz_config.focus_actors:
                 bar_events = [e for e in bar_events if e.actor in viz_config.focus_actors]
 
-            # Filter milestones to only key ones
-            if viz_config.key_milestone_events:
-                milestone_events = [e for e in milestone_events if e.action in viz_config.key_milestone_events]
+            # NOTE: Don't filter milestone_events - if Claude marked it as milestone=True, we show it
+            # The key_milestone_events list is for reference/documentation only
 
         if not bar_events:
             raise ValueError("No events with duration found. Need start AND end dates for bars.")
@@ -173,31 +172,7 @@ class GanttVisualizer:
                 yanchor='middle'
             )
 
-            # Build hover template with optional legal reasoning
-            hover_text = (
-                f"<b>{event.actor}</b><br>" +
-                f"Role: {event.roleType}<br>" +
-                f"Action: {event.action}<br>" +
-                f"Period: {event.start} to {event.end}<br>" +
-                f"Duration: {duration_label}<br>" +
-                f"Context: {event.context}<br>"
-            )
-
-            # Add Claude's legal reasoning if this actor is highlighted
-            if highlight_reason:
-                hover_text += f"<br><b>Legal Note:</b> {highlight_reason}<br>"
-
-            hover_text += "<extra></extra>"
-
-            # Add invisible trace for hover (one per event)
-            fig.add_trace(go.Scatter(
-                x=[mid_date],
-                y=[y_pos],
-                mode='markers',
-                marker=dict(size=0.1, color=color, opacity=0),
-                hovertemplate=hover_text,
-                showlegend=False
-            ))
+            # Note: Hover tooltips removed - chart is fully static
 
         # Add milestone markers (vertical lines with annotations)
         for milestone in milestone_events:
@@ -385,14 +360,15 @@ class GanttVisualizer:
         html_path = output_path.replace('.png', '.html')
         png_path = output_path
 
-        # 1. Save interactive HTML for display
+        # 1. Save FULLY STATIC HTML (no interactions, no hover)
         config = {
-            'displayModeBar': False,  # Hide entire Plotly toolbar
+            'staticPlot': True,  # Completely static - no interactions at all
+            'displayModeBar': False,
             'displaylogo': False,
-            'responsive': True
+            'responsive': False  # Fixed size to prevent cropping
         }
         fig.write_html(html_path, config=config)
-        print(f"[SUCCESS] Interactive HTML saved to {html_path}")
+        print(f"[SUCCESS] Static HTML saved to {html_path}")
 
         # 2. Save static PNG for download
         chart_height = max(600, len(actors) * 60 + 200)
