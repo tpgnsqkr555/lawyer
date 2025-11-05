@@ -49,27 +49,10 @@ STEP 2: READ THE DOCUMENT AND EXTRACT WHAT'S RELEVANT
 Based on what the user requested, extract the relevant information:
 
 **If user wants PEOPLE/STAKEHOLDERS:**
-- Extract all people mentioned (executives, employees, regulators, lawyers, consultants, etc.)
+- Extract all people mentioned (executives, employees, regulators, etc.)
 - Note their roles, employment periods (start/end dates)
-- Identify ANYONE suspicious based on the document's legal story
-
-**Actor Name Format Rules**:
-
-EXTERNAL/3RD PARTY PEOPLE (no status parenthesis):
-  * Lawyers/Counsel: "[Name] - [Title]"
-  * Regulators: "[Name] - [Title]"
-  * Consultants: "[Name] - [Title]"
-  * External advisors: "[Name] - [Title]"
-  * Anyone not employed by the main company
-
-INTERNAL COMPANY PEOPLE (include status in parenthesis):
-  * Original executives: "[Name] - [Title] (Original)"
-  * Replacement executives: "[Name] - [Title] (Replacement)"
-  * Co-opted/Promoted due to loyalty: "[Name] - [Title] (Co-opted - Loyalty)"
-  * Unqualified appointments: "[Name] - [Title] (Unqualified - [Specific Reason])"
-  * Conflicts of interest: "[Name] - [Title] (Conflict - [Specific Reason])"
-  * Nepotism: "[Name] - [Title] (Nepotism - [Relationship])"
-  * Any other suspicious internal person: "[Name] - [Title] ([Brief Description])"
+- Identify anyone with problematic qualifications or suspicious backgrounds
+- Format: "[Name] - [Title] ([Status])" where status is "Original", "Qualified", or "Unqualified - [Reason]"
 
 **If user wants DEPARTMENTS:**
 - Extract department names and their activity periods
@@ -92,7 +75,7 @@ INTERNAL COMPANY PEOPLE (include status in parenthesis):
 STEP 3: FIND KEY MILESTONE EVENTS (ALWAYS REQUIRED)
 ================================================================================
 
-Regardless of what's on the Y-axis, you MUST extract 3-5 milestone events that mark important moments:
+Regardless of what's on the Y-axis, you MUST extract milestone events (however many you deem necessay, but please necessary only) that mark important moments:
 - Regulatory actions (investigations, complaints, enforcement)
 - Major business events (deals, recalls, restatements)
 - Legal events (filings, verdicts, settlements)
@@ -104,16 +87,13 @@ These will appear as VERTICAL DOTTED LINES on the chart.
 STEP 4: IDENTIFY WHAT TO HIGHLIGHT
 ================================================================================
 
-Read the document like a legal analyst and identify ANYONE or ANYTHING suspicious based on the story:
+Based on the document, identify anything suspicious or problematic:
+- **For people**: Unqualified appointments, conflicts of interest, suspicious timing
+- **For departments**: Budget irregularities, suspicious activity timing
+- **For entities**: Conflicts of interest, problematic relationships
+- **For phases**: Delays, problems, irregularities
 
-- **For people**: Unqualified appointments, nepotism, conflicts of interest, co-opted loyalty, suspicious timing, questionable credentials, any pattern that suggests they're part of the problem
-- **For departments**: Budget irregularities, suspicious activity timing, questionable spending patterns
-- **For entities**: Conflicts of interest, problematic relationships, hidden connections
-- **For phases**: Delays, problems, irregularities, suspicious timing
-
-**CRITICAL**: Don't limit yourself to "unqualified" - if someone is qualified but promoted for loyalty, that's suspicious. If someone has conflicts of interest, that's suspicious. Let the document's legal story guide you.
-
-Highlight ALL suspicious actors in RED (#ef4444) with a specific legal explanation of why they matter to the case.
+Highlight these in RED (#ef4444) with a legal explanation of why it matters.
 
 ================================================================================
 OUTPUT FORMAT
@@ -161,17 +141,10 @@ Show your reasoning in a <thinking> section before JSON output.
 
 <thinking>
 1. What does the user want to visualize? (People? Departments? Entities? Phases? Something else?)
-2. What type of document is this? What legal story is it telling? What is the document trying to PROVE?
+2. What type of document is this? What's the story?
 3. What units did I extract for the Y-axis? (List them all)
 4. What 3-5 milestone events mark the key moments?
-5. WHO is suspicious in this case? Think like a lawyer:
-   - Who lacks qualifications?
-   - Who has conflicts of interest?
-   - Who was promoted for loyalty rather than merit?
-   - Who has suspicious timing in their appointments?
-   - Who has problematic relationships (nepotism, family)?
-   - Who is part of the pattern the document is trying to prove?
-   ALL suspicious people should be highlighted in RED with legal reasoning.
+5. Did I find anything suspicious or problematic? What should be highlighted in red and why?
 6. Should I show all units or filter to specific ones based on user's request?
 7. What's the key pattern to summarize in the footer?
 </thinking>
@@ -193,10 +166,7 @@ Show your reasoning in a <thinking> section before JSON output.
     "focus_actors": null,
     "key_milestone_events": ["...", "...", "..."],
     "actor_highlights": [
-      {{"name": "Person Name - Title (Unqualified - Fake PhD)", "color": "#ef4444", "reason": "Fraudulent credentials enabled data manipulation"}},
-      {{"name": "Person Name - Title (Co-opted - Loyalty)", "color": "#ef4444", "reason": "Promoted specifically for demonstrating loyalty over competence"}},
-      {{"name": "Person Name - Title (Nepotism - Relationship)", "color": "#ef4444", "reason": "Family connection to board member, lacks required experience"}},
-      {{"name": "Person Name - Title (Conflict - Relationship)", "color": "#ef4444", "reason": "Undisclosed financial interest in vendor company"}}
+      {{"name": "Person Name - Title (Unqualified - Reason)", "color": "#ef4444", "reason": "Why this is legally significant"}}
     ],
     "sort_strategy": "chronological",
     "title_override": null,
@@ -274,13 +244,7 @@ DOCUMENT TEXT
         else:
             json_str = response_text.strip()
 
-        try:
-            data = json.loads(json_str)
-        except json.JSONDecodeError as e:
-            print(f"[ERROR] JSON Parse Error: {e}")
-            print(f"[ERROR] Raw response (first 1000 chars): {response_text[:1000]}")
-            print(f"[ERROR] Extracted JSON (first 1000 chars): {json_str[:1000]}")
-            raise Exception(f"Failed to parse JSON from Claude response: {e}")
+        data = json.loads(json_str)
 
         # Validate and yield final structured data
         timeline_data = TimelineData(**data)
